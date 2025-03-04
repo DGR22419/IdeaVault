@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - IdeaVault</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="student-dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <span class="idea">Idea</span><span class="vault">Vault</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../home/index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Dashboard</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <div class="user-info me-3">
+                        <span class="user-name" id="userName"></span>
+                        <small class="d-block text-muted" id="userRole"></small>
+                    </div>
+                    <button class="btn btn-outline-danger" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="dashboard-sidebar">
+            <div class="sidebar-menu">
+                <a href="#" class="menu-item active" onclick="showDashboardSection('myProjects')">
+                    <i class="fas fa-folder"></i>
+                    <span>My Projects</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showDashboardSection('submitProject')">
+                    <i class="fas fa-upload"></i>
+                    <span>Submit New Project</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showDashboardSection('browseProjects')">
+                    <i class="fas fa-search"></i>
+                    <span>Browse Projects</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showDashboardSection('myProgress')">
+                    <i class="fas fa-chart-line"></i>
+                    <span>My Progress</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showDashboardSection('projectFeedback')">
+                    <i class="fas fa-comments"></i>
+                    <span>Project Feedback</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showDashboardSection('settings')">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="dashboard-main">
+            <!-- My Projects Section -->
+            <div id="myProjectsSection" class="dashboard-section">
+                <div class="section-header mb-4">
+                    <h3>My Projects</h3>
+                    <p class="text-muted">Manage and track your submitted projects</p>
+                </div>
+                <div class="project-filters mb-3">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary active" onclick="filterMyProjects('all')">All</button>
+                        <button type="button" class="btn btn-outline-primary" onclick="filterMyProjects('pending')">Pending</button>
+                        <button type="button" class="btn btn-outline-primary" onclick="filterMyProjects('approved')">Approved</button>
+                        <button type="button" class="btn btn-outline-primary" onclick="filterMyProjects('rejected')">Rejected</button>
+                    </div>
+                </div>
+                <div id="myProjectsList" class="projects-list">
+                    <!-- Projects will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Submit Project Section -->
+            <div id="submitProjectSection" class="dashboard-section" style="display: none;">
+                <div class="section-header mb-4">
+                    <h3>Submit New Project</h3>
+                    <p class="text-muted">Upload your project details and files</p>
+                </div>
+                <form id="projectUploadForm" class="project-upload-form">
+                    <div class="mb-3">
+                        <label for="projectTitle" class="form-label">Project Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="projectTitle" required>
+                        <div class="invalid-feedback">Please enter a project title.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="projectCategory" class="form-label">Project Category <span class="text-danger">*</span></label>
+                        <select class="form-select" id="projectCategory" required>
+                            <option value="">Select a category</option>
+                            <option value="AI">AI & Machine Learning</option>
+                            <option value="Web">Web Development</option>
+                            <option value="Mobile">Mobile Applications</option>
+                            <option value="IoT">Internet of Things</option>
+                            <option value="Blockchain">Blockchain</option>
+                            <option value="Security">Cybersecurity</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a project category.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="projectDescription" class="form-label">Project Description <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="projectDescription" rows="4" required></textarea>
+                        <div class="invalid-feedback">Please enter a project description.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Technologies Used</label>
+                        <div class="tech-input-container">
+                            <input type="text" class="form-control" id="techInput" placeholder="Type and press Enter to add technologies">
+                            <div class="selected-techs" id="selectedTechs"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="githubLink" class="form-label">GitHub Repository Link</label>
+                        <input type="url" class="form-control" id="githubLink" placeholder="https://github.com/username/repository">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="projectFiles" class="form-label">Project Files</label>
+                        <div class="file-drop-zone" id="fileDropZone">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag and drop files here or click to select</p>
+                            <input type="file" class="d-none" id="projectFiles" multiple>
+                        </div>
+                        <div id="fileList" class="mt-2"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary" onclick="handleProjectSubmit()">
+                            <i class="fas fa-upload me-2"></i>Submit Project
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Browse Projects Section -->
+            <div id="browseProjectsSection" class="dashboard-section" style="display: none;">
+                <div class="section-header mb-4">
+                    <h3>Browse Projects</h3>
+                    <p class="text-muted">Explore projects from other students</p>
+                </div>
+                <div class="browse-filters mb-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="searchProjects" placeholder="Search projects...">
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="categoryFilter">
+                                <option value="all">All Categories</option>
+                                <option value="AI">AI & Machine Learning</option>
+                                <option value="Web">Web Development</option>
+                                <option value="Mobile">Mobile Applications</option>
+                                <option value="IoT">Internet of Things</option>
+                                <option value="Blockchain">Blockchain</option>
+                                <option value="Security">Cybersecurity</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="sortFilter">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="title">Title A-Z</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div id="browseProjectsList" class="projects-list">
+                    <!-- Projects will be loaded here -->
+                </div>
+            </div>
+
+            <!-- My Progress Section -->
+            <div id="myProgressSection" class="dashboard-section" style="display: none;">
+                <div class="section-header mb-4">
+                    <h3>My Progress</h3>
+                    <p class="text-muted">Track your project submissions and achievements</p>
+                </div>
+
+                <!-- Project Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <i class="fas fa-folder-open"></i>
+                            <h3 id="totalProjectsCount">0</h3>
+                            <p>Total Projects</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <h3 id="approvedProjectsCount">0</h3>
+                            <p>Approved</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <i class="fas fa-clock text-warning"></i>
+                            <h3 id="pendingProjectsCount">0</h3>
+                            <p>Pending Review</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <i class="fas fa-exclamation-circle text-danger"></i>
+                            <h3 id="rejectedProjectsCount">0</h3>
+                            <p>Needs Revision</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Progress -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Progress by Category</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="categoryProgressBars" class="category-progress">
+                            <!-- Category progress bars will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Timeline -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="activityTimeline" class="timeline">
+                            <!-- Activity timeline items will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Feedback Section -->
+            <div id="projectFeedbackSection" class="dashboard-section" style="display: none;">
+                <div class="section-header mb-4">
+                    <h3>Project Feedback</h3>
+                    <p class="text-muted">View feedback and comments on your projects</p>
+                </div>
+                <div id="feedbackList">
+                    <!-- Feedback items will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settingsSection" class="dashboard-section" style="display: none;">
+                <div class="section-header mb-4">
+                    <h3>Settings</h3>
+                    <p class="text-muted">Manage your account preferences</p>
+                </div>
+                <form id="settingsForm" class="settings-form">
+                    <div class="mb-4">
+                        <h5>Profile Information</h5>
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="fullName">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="githubUsername" class="form-label">GitHub Username</label>
+                            <input type="text" class="form-control" id="githubUsername">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Notification Preferences</h5>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="emailNotifications">
+                            <label class="form-check-label" for="emailNotifications">
+                                Receive email notifications
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="projectUpdates">
+                            <label class="form-check-label" for="projectUpdates">
+                                Project status updates
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="feedbackNotifications">
+                            <label class="form-check-label" for="feedbackNotifications">
+                                New feedback notifications
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Change Password</h5>
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="currentPassword">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword">
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirmPassword">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Upload Modal -->
+    <div class="modal fade" id="projectUploadModal" tabindex="-1" aria-labelledby="projectUploadModalLabel" aria-hidden="true">
+        <!-- Same modal content as before -->
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="student-dashboard.js"></script>
+</body>
+</html>

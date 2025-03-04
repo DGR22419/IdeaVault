@@ -3,6 +3,80 @@ const router = express.Router();
 const Project = require('../models/Project');
 const auth = require('../middleware/auth');
 
+// Get project statistics
+router.get('/stats', auth, async (req, res) => {
+    try {
+        // Get status distribution
+        const statusDistribution = await Project.aggregate([
+            { $group: { _id: '$status', count: { $sum: 1 } } }
+        ]);
+
+        // Get category distribution
+        const categoryDistribution = await Project.aggregate([
+            { $group: { _id: '$category', count: { $sum: 1 } } }
+        ]);
+
+        // Get activity timeline (last 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        const activityTimeline = await Project.aggregate([
+            {
+                $match: {
+                    submissionDate: { $gte: sevenDaysAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: '%Y-%m-%d', date: '$submissionDate' } },
+                    submissions: { $sum: 1 },
+                    reviews: {
+                        $sum: {
+                            $cond: [
+                                { $in: ['$status', ['APPROVED', 'REJECTED']] },
+                                1,
+                                0
+                            ]
+                        }
+                    }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        // Get recent activities
+        const recentActivities = await Project.find()
+            .populate('submittedBy', 'firstName lastName')
+            .sort({ submissionDate: -1 })
+            .limit(5)
+            .select('title status submissionDate submittedBy');
+
+        // Format the response
+        const formattedResponse = {
+            statusDistribution: statusDistribution.reduce((acc, curr) => {
+                acc[curr._id.toLowerCase()] = curr.count;
+                return acc;
+            }, {}),
+            categoryDistribution: categoryDistribution.reduce((acc, curr) => {
+                acc[curr._id] = curr.count;
+                return acc;
+            }, {}),
+            activityTimeline: activityTimeline,
+            recentActivities: recentActivities.map(activity => ({
+                type: activity.status === 'PENDING' ? 'submission' : 'review',
+                timestamp: activity.submissionDate,
+                studentName: `${activity.submittedBy.firstName} ${activity.submittedBy.lastName}`,
+                description: `${activity.title} project ${activity.status === 'PENDING' ? 'submitted' : activity.status.toLowerCase()}`
+            }))
+        };
+
+        res.json(formattedResponse);
+    } catch (error) {
+        console.error('Error fetching project stats:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Get all projects
 router.get('/', auth, async (req, res) => {
     try {

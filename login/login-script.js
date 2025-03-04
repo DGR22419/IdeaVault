@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const API_BASE_URL = 'http://localhost:30001';
+    const API_BASE_URL = 'http://localhost:8080';
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -88,23 +88,31 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Response data:', data);
 
             if (response.ok) {
-                // Store user info in session
+                // Store user info in session based on user type
                 sessionStorage.setItem('userType', data.user.role);
-                sessionStorage.setItem('userId', data.user.id);
-                sessionStorage.setItem('userName', data.user.name);
-                sessionStorage.setItem('userEmail', data.user.email);
                 sessionStorage.setItem('token', data.token);
                 sessionStorage.setItem('isLoggedIn', 'true');
+                
+                if (userType === 'faculty') {
+                    sessionStorage.setItem('facultyId', data.user.id);
+                    sessionStorage.setItem('facultyName', data.user.name);
+                } else {
+                    sessionStorage.setItem('studentId', data.user.id);
+                    sessionStorage.setItem('userName', data.user.name);
+                }
+                
+                sessionStorage.setItem('userEmail', data.user.email);
 
-                showSuccess('Login successful! Redirecting to homepage...');
+                showSuccess('Login successful! Redirecting...');
                 console.log('Login successful, redirecting...');
                 
-                // Use window.location.origin to get the base URL
-                const homeUrl = window.location.origin + '/home/index.html';
-                console.log('Redirecting to:', homeUrl);
+                // Redirect to homepage after successful login
+                const redirectUrl = '../home/index.html';
+                
+                console.log('Redirecting to:', redirectUrl);
                 
                 setTimeout(() => {
-                    window.location.href = homeUrl;
+                    window.location.href = redirectUrl;
                 }, 1500);
             } else {
                 console.error('Login failed:', data.message);
