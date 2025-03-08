@@ -2,7 +2,7 @@
     "version": 2,
     "builds": [
         {
-            "src": "backend/**/*.js",
+            "src": "backend/server.js",
             "use": "@vercel/node"
         },
         {
@@ -45,7 +45,7 @@
         },
         {
             "src": "/(.*)",
-            "dest": "login/login.html"
+            "status": 404
         }
     ]
-} 
+}
