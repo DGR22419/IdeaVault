@@ -4,7 +4,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8081;
 
 // Sample user data (replace with database in production)
 const users = {
@@ -16,14 +16,11 @@ const users = {
     ]
 };
 
-// Enable CORS with specific options
-app.use(cors({
-    origin: 'http://localhost:8080',
-    credentials: true
-}));
+// Enable CORS
+app.use(cors());
 
 // Body parsing middleware
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static files
