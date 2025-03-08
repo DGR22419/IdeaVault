@@ -25,8 +25,10 @@ app.use(express.urlencoded({ extended: true }));
 // Serve uploaded files statically
 app.use('/uploads', express.static('uploads'));
 
+const MONGO_URI = "mongodb+srv://dgr:Dev22419@ideavault.eiwv8.mongodb.net/?retryWrites=true&w=majority&appName=ideavault";
+
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
+mongoose.connect(MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
