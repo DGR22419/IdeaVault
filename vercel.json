@@ -47,5 +47,5 @@
             "src": "/(.*)",
             "dest": "login/login.html"
         }
-    ],
+    ]
 } 
